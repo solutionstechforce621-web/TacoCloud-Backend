@@ -1,9 +1,6 @@
 package com.api.Summit.API.reports.pdf.service;
 
-import com.api.Summit.API.view.dto.CategoriaReportDTO;
-import com.api.Summit.API.view.dto.ClienteReportDTO;
-import com.api.Summit.API.view.dto.ProductoReportDTO;
-import com.api.Summit.API.view.dto.ProductoReportDataDTO;
+import com.api.Summit.API.view.dto.*;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import lombok.extern.slf4j.Slf4j;
@@ -493,6 +490,246 @@ public class PdfReportService {
                     .sum() / reportDTO.getTotalProductos();
             addSummaryRow(summaryTable, "Promedio categorías/producto:", String.format("%.1f", promedioCategorias));
         }
+
+        document.add(summaryTable);
+    }
+
+    public byte[] generateInventarioReport(InventarioReportDTO reportDTO, String tipoReporte) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            Document document = new Document(PageSize.A4.rotate()); // Horizontal para más columnas
+            PdfWriter.getInstance(document, baos);
+            document.open();
+
+            // Encabezado
+            addInventarioHeader(document, reportDTO);
+
+            // Espacio en blanco
+            document.add(new Paragraph(" "));
+
+            // Contenido según el tipo de reporte
+            switch (tipoReporte.toLowerCase()) {
+                case "bajo-stock":
+                    generateBajoStockReport(document, reportDTO);
+                    break;
+                case "sobre-stock":
+                    generateSobreStockReport(document, reportDTO);
+                    break;
+                case "diario":
+                case "semanal":
+                case "mensual":
+                    generatePeriodicReport(document, reportDTO, tipoReporte);
+                    break;
+                default:
+                    generateCompletoReport(document, reportDTO);
+                    break;
+            }
+
+            document.close();
+            return baos.toByteArray();
+
+        } catch (Exception e) {
+            log.error("Error generando reporte PDF de inventario", e);
+            throw new RuntimeException("Error al generar el reporte PDF: " + e.getMessage());
+        }
+    }
+
+    private void addInventarioHeader(Document document, InventarioReportDTO reportDTO) throws DocumentException {
+        PdfPTable headerTable = new PdfPTable(2);
+        headerTable.setWidthPercentage(100);
+        headerTable.setWidths(new float[]{1, 3});
+
+        // Celda para la imagen
+        try {
+            Image logo = Image.getInstance(new ClassPathResource("static/reporte.png").getURL());
+            logo.scaleToFit(80, 80);
+            PdfPCell imageCell = new PdfPCell(logo, true);
+            imageCell.setBorder(Rectangle.NO_BORDER);
+            imageCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            imageCell.setPadding(5);
+            headerTable.addCell(imageCell);
+        } catch (IOException e) {
+            log.warn("No se pudo cargar la imagen del logo, usando celda vacía");
+            PdfPCell emptyCell = new PdfPCell();
+            emptyCell.setBorder(Rectangle.NO_BORDER);
+            headerTable.addCell(emptyCell);
+        }
+
+        // Celda para la información del reporte
+        PdfPCell infoCell = new PdfPCell();
+        infoCell.setBorder(Rectangle.NO_BORDER);
+        infoCell.setPadding(5);
+
+        Paragraph title = new Paragraph(reportDTO.getTitulo(), TITLE_FONT);
+        title.setAlignment(Element.ALIGN_CENTER);
+
+        Paragraph date = new Paragraph("Fecha: " + reportDTO.getFechaGeneracion(), NORMAL_FONT);
+        date.setAlignment(Element.ALIGN_CENTER);
+
+        if (reportDTO.getPeriodo() != null && !reportDTO.getPeriodo().isEmpty()) {
+            Paragraph periodo = new Paragraph(reportDTO.getPeriodo(), NORMAL_FONT);
+            periodo.setAlignment(Element.ALIGN_CENTER);
+            infoCell.addElement(periodo);
+        }
+
+        Paragraph negocioInfo = new Paragraph("Negocio: " + reportDTO.getNegocioNombre(), SMALL_FONT);
+        negocioInfo.setAlignment(Element.ALIGN_CENTER);
+
+        infoCell.addElement(title);
+        infoCell.addElement(date);
+        infoCell.addElement(negocioInfo);
+        headerTable.addCell(infoCell);
+
+        document.add(headerTable);
+    }
+
+    private void generateBajoStockReport(Document document, InventarioReportDTO reportDTO) throws DocumentException {
+        // Tabla para productos con stock bajo
+        PdfPTable table = new PdfPTable(7);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{1, 3, 2, 2, 2, 2, 3});
+
+        // Encabezados de la tabla
+        addTableHeader(table, "ID");
+        addTableHeader(table, "PRODUCTO");
+        addTableHeader(table, "CATEGORÍA");
+        addTableHeader(table, "STOCK ACTUAL");
+        addTableHeader(table, "MÍNIMO");
+        addTableHeader(table, "DÉFICIT");
+        addTableHeader(table, "ESTADO");
+
+        // Datos de los productos
+        for (var producto : reportDTO.getProductos()) {
+            if ("CRÍTICO".equals(producto.getEstadoStock()) || "BAJO".equals(producto.getEstadoStock())) {
+                int deficit = producto.getCantidadMinima() - producto.getCantidad();
+
+                addTableRow(table, producto.getId().toString());
+                addTableRow(table, producto.getNombre());
+                addTableRow(table, producto.getCategoria());
+                addTableRow(table, String.valueOf(producto.getCantidad()));
+                addTableRow(table, String.valueOf(producto.getCantidadMinima()));
+                addTableRow(table, String.valueOf(deficit));
+
+                // Celda con color según el estado
+                PdfPCell estadoCell = new PdfPCell(new Phrase(producto.getEstadoStock(), NORMAL_FONT));
+                estadoCell.setPadding(5);
+                if ("CRÍTICO".equals(producto.getEstadoStock())) {
+                    estadoCell.setBackgroundColor(new BaseColor(255, 102, 102)); // Rojo
+                } else {
+                    estadoCell.setBackgroundColor(new BaseColor(255, 204, 102)); // Amarillo
+                }
+                table.addCell(estadoCell);
+            }
+        }
+
+        document.add(table);
+        addInventarioResumenSection(document, reportDTO);
+    }
+
+    private void generateSobreStockReport(Document document, InventarioReportDTO reportDTO) throws DocumentException {
+        // Tabla para productos con sobre stock
+        PdfPTable table = new PdfPTable(7);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{1, 3, 2, 2, 2, 2, 3});
+
+        // Encabezados de la tabla
+        addTableHeader(table, "ID");
+        addTableHeader(table, "PRODUCTO");
+        addTableHeader(table, "CATEGORÍA");
+        addTableHeader(table, "STOCK ACTUAL");
+        addTableHeader(table, "MÁXIMO");
+        addTableHeader(table, "EXCESO");
+        addTableHeader(table, "VALOR EXCESO");
+
+        // Datos de los productos
+        for (var producto : reportDTO.getProductos()) {
+            if ("SOBRE STOCK".equals(producto.getEstadoStock())) {
+                int exceso = producto.getCantidad() - producto.getCantidadMaxima();
+                double valorExceso = exceso * producto.getPrecioUnitario();
+
+                addTableRow(table, producto.getId().toString());
+                addTableRow(table, producto.getNombre());
+                addTableRow(table, producto.getCategoria());
+                addTableRow(table, String.valueOf(producto.getCantidad()));
+                addTableRow(table, String.valueOf(producto.getCantidadMaxima()));
+                addTableRow(table, String.valueOf(exceso));
+                addTableRow(table, String.format("$%.2f", valorExceso));
+            }
+        }
+
+        document.add(table);
+        addInventarioResumenSection(document, reportDTO);
+    }
+
+    private void generatePeriodicReport(Document document, InventarioReportDTO reportDTO, String periodo) throws DocumentException {
+        // Tabla para reportes periódicos
+        PdfPTable table = new PdfPTable(8);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{1, 3, 2, 2, 2, 2, 3, 3});
+
+        // Encabezados de la tabla
+        addTableHeader(table, "ID");
+        addTableHeader(table, "PRODUCTO");
+        addTableHeader(table, "CATEGORÍA");
+        addTableHeader(table, "STOCK ACTUAL");
+        addTableHeader(table, "MÍNIMO");
+        addTableHeader(table, "MÁXIMO");
+        addTableHeader(table, "ESTADO");
+        addTableHeader(table, "VALOR TOTAL");
+
+        // Datos de los productos
+        for (var producto : reportDTO.getProductos()) {
+            addTableRow(table, producto.getId().toString());
+            addTableRow(table, producto.getNombre());
+            addTableRow(table, producto.getCategoria());
+            addTableRow(table, String.valueOf(producto.getCantidad()));
+            addTableRow(table, String.valueOf(producto.getCantidadMinima()));
+            addTableRow(table, String.valueOf(producto.getCantidadMaxima()));
+
+            // Celda con color según el estado
+            PdfPCell estadoCell = new PdfPCell(new Phrase(producto.getEstadoStock(), NORMAL_FONT));
+            estadoCell.setPadding(5);
+            switch (producto.getEstadoStock()) {
+                case "CRÍTICO":
+                    estadoCell.setBackgroundColor(new BaseColor(255, 102, 102)); // Rojo
+                    break;
+                case "BAJO":
+                    estadoCell.setBackgroundColor(new BaseColor(255, 204, 102)); // Amarillo
+                    break;
+                case "SOBRE STOCK":
+                    estadoCell.setBackgroundColor(new BaseColor(102, 204, 255)); // Azul claro
+                    break;
+                default:
+                    estadoCell.setBackgroundColor(new BaseColor(204, 255, 204)); // Verde claro
+                    break;
+            }
+            table.addCell(estadoCell);
+
+            addTableRow(table, String.format("$%.2f", producto.getValorTotal()));
+        }
+
+        document.add(table);
+        addInventarioResumenSection(document, reportDTO);
+    }
+
+    private void generateCompletoReport(Document document, InventarioReportDTO reportDTO) throws DocumentException {
+        generatePeriodicReport(document, reportDTO, "completo");
+    }
+
+    private void addInventarioResumenSection(Document document, InventarioReportDTO reportDTO) throws DocumentException {
+        document.add(new Paragraph(" "));
+
+        // Crear tabla para el resumen
+        PdfPTable summaryTable = new PdfPTable(2);
+        summaryTable.setWidthPercentage(80);
+        summaryTable.setHorizontalAlignment(Element.ALIGN_CENTER);
+        summaryTable.setWidths(new float[]{2, 1});
+
+        // Filas del resumen
+        addSummaryRow(summaryTable, "Total de productos:", String.valueOf(reportDTO.getTotalProductos()));
+        addSummaryRow(summaryTable, "Productos con stock normal:", String.valueOf(reportDTO.getProductosStockNormal()));
+        addSummaryRow(summaryTable, "Productos con stock bajo:", String.valueOf(reportDTO.getProductosBajoStock()));
+        addSummaryRow(summaryTable, "Productos con sobre stock:", String.valueOf(reportDTO.getProductosSobreStock()));
+        addSummaryRow(summaryTable, "Valor total del inventario:", String.format("$%.2f", reportDTO.getValorTotalInventario()));
 
         document.add(summaryTable);
     }
