@@ -181,4 +181,11 @@ public class ClienteServiceImpl implements ClienteService {
         return clienteRepository.countByNegocioId(negocioId);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Cliente findEntityByIdAndNegocioId(Long id, Long negocioId) {
+        return clienteRepository.findByIdAndNegocioId(id, negocioId)
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado con ID: " + id + " para el negocio: " + negocioId));
+    }
+
 }

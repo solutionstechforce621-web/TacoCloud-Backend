@@ -1,4 +1,5 @@
 package com.api.Summit.API.service.interfaces;
+import com.api.Summit.API.model.entities.Producto;
 import com.api.Summit.API.view.dto.ProductoDTO;
 import com.api.Summit.API.view.dto.ProductoDetailDTO;
 import com.api.Summit.API.view.dto.ProductoRequestDTO;
@@ -11,7 +12,7 @@ public interface ProductoService {
     ProductoDTO save(ProductoRequestDTO productoRequestDTO);
     ProductoDTO update(Long id, ProductoRequestDTO productoRequestDTO);
     void deleteById(Long id);
-
+    Producto findEntityByIdAndNegocioId(Long id, Long negocioId);
     // Métodos con filtro por negocio
     Page<ProductoDTO> findAllByNegocioId(Long negocioId, Pageable pageable);
     ProductoDTO findByIdAndNegocioId(Long id, Long negocioId);

@@ -196,4 +196,10 @@ public class NegocioService {
         negocio.getUsuarios().forEach(usuario -> usuario.removeNegocio(negocio));
         negocioRepository.delete(negocio);
     }
+
+    @Transactional(readOnly = true)
+    public Negocio findEntityById(Long id) {
+        return negocioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Negocio no encontrado con ID: " + id));
+    }
 }
