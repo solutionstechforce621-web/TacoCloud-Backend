@@ -1,4 +1,5 @@
 package com.api.Summit.API.service.interfaces;
+import com.api.Summit.API.model.entities.Cliente;
 import com.api.Summit.API.view.dto.ClienteDTO;
 import com.api.Summit.API.view.dto.ClienteRequestDTO;
 import org.springframework.data.domain.Page;
@@ -21,4 +22,5 @@ public interface ClienteService {
     byte[] generateClientesReportPdf(Long negocioId, String tipoReporte);
     byte[] generateClientesExcelReport(Long negocioId, String tipoReporte);
     long countByNegocioId(Long negocioId);
+    Cliente findEntityByIdAndNegocioId(Long id, Long negocioId);
 }

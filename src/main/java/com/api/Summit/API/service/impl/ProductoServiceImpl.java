@@ -221,4 +221,11 @@ public class ProductoServiceImpl implements ProductoService {
                                 .collect(Collectors.toSet()) : null)
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Producto findEntityByIdAndNegocioId(Long id, Long negocioId) {
+        return productoRepository.findByIdAndNegocioId(id, negocioId)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id + " para el negocio: " + negocioId));
+    }
 }
