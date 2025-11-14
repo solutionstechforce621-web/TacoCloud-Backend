@@ -58,6 +58,11 @@ public class NegocioService {
         Negocio negocio = Negocio.builder()
                 .nombre(negocioDTO.getNombre())
                 .descripcion(negocioDTO.getDescripcion())
+                .domicilio(negocioDTO.getDomicilio())
+                .rfc(negocioDTO.getRfc())
+                .codigoPostal(negocioDTO.getCodigoPostal())
+                .correo(negocioDTO.getCorreo())
+                .telefono(negocioDTO.getTelefono()) // ✅ Agregar el campo teléfono
                 .build();
 
         Negocio negocioGuardado = negocioRepository.save(negocio);
@@ -85,10 +90,16 @@ public class NegocioService {
 
         negocio.setNombre(negocioDTO.getNombre());
         negocio.setDescripcion(negocioDTO.getDescripcion());
+        negocio.setDomicilio(negocioDTO.getDomicilio());      // ✅ Agregar
+        negocio.setRfc(negocioDTO.getRfc());                  // ✅ Agregar
+        negocio.setCodigoPostal(negocioDTO.getCodigoPostal());// ✅ Agregar
+        negocio.setCorreo(negocioDTO.getCorreo());            // ✅ Agregar
+        negocio.setTelefono(negocioDTO.getTelefono());        // ✅ Agregar
 
         Negocio negocioActualizado = negocioRepository.save(negocio);
         return NegocioDTO.fromNegocio(negocioActualizado);
     }
+
 
     // Eliminar negocio (solo si pertenece al usuario)
     @Transactional
@@ -128,6 +139,11 @@ public class NegocioService {
         Negocio negocio = Negocio.builder()
                 .nombre(negocioDTO.getNombre())
                 .descripcion(negocioDTO.getDescripcion())
+                .domicilio(negocioDTO.getDomicilio())
+                .rfc(negocioDTO.getRfc())
+                .codigoPostal(negocioDTO.getCodigoPostal())
+                .correo(negocioDTO.getCorreo())
+                .telefono(negocioDTO.getTelefono()) // ✅ Agregar aquí también
                 .build();
 
         Negocio negocioGuardado = negocioRepository.save(negocio);

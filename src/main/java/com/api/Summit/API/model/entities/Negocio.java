@@ -27,6 +27,21 @@ public class Negocio {
     @Column(name = "descripcion", columnDefinition = "TEXT")
     private String descripcion;
 
+    @Column(name = "domicilio", length = 120)
+    private String domicilio;
+
+    @Column(name = "rfc", length = 30)
+    private String rfc;
+
+    @Column(name = "codigoPostal", length = 10)
+    private String codigoPostal;
+
+    @Column(name = "correo", length = 80)
+    private String correo;
+
+    @Column(name = "telefono", length= 20)
+    private String telefono;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

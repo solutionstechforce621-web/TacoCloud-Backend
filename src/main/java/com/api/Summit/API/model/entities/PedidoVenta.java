@@ -45,6 +45,9 @@ public class PedidoVenta {
     @Column(name = "ticket_cliente", length = 50)
     private String ticketCliente;
 
+    @Column(name = "nombre_cliente", length = 100)
+    private String nombreCliente;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "negocio_id", nullable = false)
     private Negocio negocio;

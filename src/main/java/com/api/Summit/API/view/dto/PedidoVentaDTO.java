@@ -24,6 +24,7 @@ public class PedidoVentaDTO {
     private Long negocioId;
     private Long clienteId;
     private String clienteNombre;
+    private String nombreCliente;
     private List<DetallePedidoVentaDTO> detalles;
     private PagoDTO pago;
     private LocalDateTime createdAt;
@@ -41,6 +42,7 @@ public class PedidoVentaDTO {
                 .negocioId(pedido.getNegocio().getId())
                 .clienteId(pedido.getCliente() != null ? pedido.getCliente().getId() : null)
                 .clienteNombre(pedido.getCliente() != null ? pedido.getCliente().getNombre() : null)
+                .nombreCliente(pedido.getNombreCliente())
                 .detalles(pedido.getDetalles() != null ?
                         pedido.getDetalles().stream().map(DetallePedidoVentaDTO::fromEntity).toList() : null)
                 .pago(pedido.getPago() != null ? PagoDTO.fromEntity(pedido.getPago()) : null)
