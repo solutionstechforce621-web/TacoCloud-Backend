@@ -15,5 +15,6 @@ public class PedidoRequestDTO {
     private EstadoPedido estado;
     private String observaciones;
     private Long clienteId;
+    private String nombreCliente;
     private List<DetallePedidoRequestDTO> detalles;
 }

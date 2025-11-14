@@ -46,6 +46,7 @@ public class PedidoVentaServiceImpl implements PedidoVentaService {
                 .tipoPedido(pedidoRequestDTO.getTipoPedido())
                 .estado(EstadoPedido.PENDIENTE)
                 .observaciones(pedidoRequestDTO.getObservaciones())
+                .nombreCliente(pedidoRequestDTO.getNombreCliente())
                 .negocio(negocio)
                 .cliente(cliente)
                 .total(BigDecimal.ZERO)
@@ -110,6 +111,7 @@ public class PedidoVentaServiceImpl implements PedidoVentaService {
         // Actualizar datos básicos
         pedido.setTipoPedido(pedidoRequestDTO.getTipoPedido());
         pedido.setObservaciones(pedidoRequestDTO.getObservaciones());
+        pedido.setNombreCliente(pedidoRequestDTO.getNombreCliente());
 
         // Actualizar cliente si se proporciona
         if (pedidoRequestDTO.getClienteId() != null) {
