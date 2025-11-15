@@ -1,7 +1,6 @@
 package com.api.Summit.API.view.controller;
 
 import com.api.Summit.API.model.enums.EstadoPedido;
-import com.api.Summit.API.reports.ticket.service.ThermalPrintService;
 import com.api.Summit.API.service.exception.ApiResponse;
 import com.api.Summit.API.service.interfaces.PedidoVentaService;
 import com.api.Summit.API.view.dto.PedidoRequestDTO;
@@ -25,7 +24,6 @@ import java.util.Map;
 public class PedidoController {
 
     private final PedidoVentaService pedidoVentaService;
-    private final ThermalPrintService thermalPrintService;
 
     // ➕ Crear pedido
     @PostMapping("/negocio/{negocioId}")
@@ -211,39 +209,5 @@ public class PedidoController {
 
         long totalPedidos = pedidoVentaService.countByNegocioId(negocioId);
         return ResponseEntity.ok(ApiResponse.success(Map.of("totalPedidos", totalPedidos), "Total de pedidos obtenido"));
-    }
-
-    // 🖨️ Imprimir ticket de cocina
-    @PostMapping("/{id}/negocio/{negocioId}/imprimir-cocina")
-    public ResponseEntity<ApiResponse<String>> imprimirTicketCocina(
-            @PathVariable Long id,
-            @PathVariable Long negocioId,
-            @RequestParam String printerName) {
-
-        try {
-            PedidoVentaDTO pedido = pedidoVentaService.findByIdAndNegocioId(id, negocioId);
-            thermalPrintService.printKitchenTicket(pedido, printerName);
-            return ResponseEntity.ok(ApiResponse.success("Ticket de cocina impreso"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(e.getMessage()));
-        }
-    }
-
-    // 🖨️ Imprimir ticket de cliente
-    @PostMapping("/{id}/negocio/{negocioId}/imprimir-cliente")
-    public ResponseEntity<ApiResponse<String>> imprimirTicketCliente(
-            @PathVariable Long id,
-            @PathVariable Long negocioId,
-            @RequestParam String printerName) {
-
-        try {
-            PedidoVentaDTO pedido = pedidoVentaService.findByIdAndNegocioId(id, negocioId);
-            thermalPrintService.printCustomerTicket(pedido, printerName);
-            return ResponseEntity.ok(ApiResponse.success("Ticket de cliente impreso"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(e.getMessage()));
-        }
     }
 }
