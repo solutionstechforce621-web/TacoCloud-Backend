@@ -30,14 +30,6 @@ public class Caja {
     @Column(name = "saldo_actual", nullable = false)
     private double saldoActual;
 
-    // Suma de pagos de pedidos
-    @Column(nullable = false)
-    private Double ingresos = 0.0;
-
-    // Retiros no asociados a pedidos (gastos)
-    @Column(nullable = false)
-    private Double egresos = 0.0;
-
     @Column(name = "estado", nullable = false)
     private boolean estado; // true = abierta, false = cerrada
 

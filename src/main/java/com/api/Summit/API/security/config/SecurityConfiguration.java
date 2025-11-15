@@ -34,7 +34,6 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/productos/**").permitAll()
                         .requestMatchers("/api/inventario/**").permitAll()
                         .requestMatchers("/api/pedidos/**").permitAll()
-                        .requestMatchers("/api/impresion/**").permitAll()
                         // Reportes pdf
                         .requestMatchers("/api/clientes/reportes/**").permitAll()
                         .requestMatchers("/api/categorias/reportes/**").permitAll()
