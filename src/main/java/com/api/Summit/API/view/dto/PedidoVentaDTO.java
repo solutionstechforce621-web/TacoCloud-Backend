@@ -1,5 +1,6 @@
 package com.api.Summit.API.view.dto;
 
+import com.api.Summit.API.model.entities.PedidoVenta;
 import com.api.Summit.API.model.enums.EstadoPedido;
 import com.api.Summit.API.model.enums.TipoPedido;
 import lombok.*;
@@ -21,6 +22,7 @@ public class PedidoVentaDTO {
     private String observaciones;
     private String ticketCocina;
     private String ticketCliente;
+    private NegocioDTO negocio;
     private Long negocioId;
     private Long clienteId;
     private String clienteNombre;
@@ -30,7 +32,7 @@ public class PedidoVentaDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static PedidoVentaDTO fromEntity(com.api.Summit.API.model.entities.PedidoVenta pedido) {
+    public static PedidoVentaDTO fromEntity(PedidoVenta pedido) {
         return PedidoVentaDTO.builder()
                 .id(pedido.getId())
                 .tipoPedido(pedido.getTipoPedido())
@@ -39,6 +41,7 @@ public class PedidoVentaDTO {
                 .observaciones(pedido.getObservaciones())
                 .ticketCocina(pedido.getTicketCocina())
                 .ticketCliente(pedido.getTicketCliente())
+                .negocio(NegocioDTO.fromNegocio(pedido.getNegocio()))   // ← AGREGADO
                 .negocioId(pedido.getNegocio().getId())
                 .clienteId(pedido.getCliente() != null ? pedido.getCliente().getId() : null)
                 .clienteNombre(pedido.getCliente() != null ? pedido.getCliente().getNombre() : null)
@@ -50,4 +53,5 @@ public class PedidoVentaDTO {
                 .updatedAt(pedido.getUpdatedAt())
                 .build();
     }
+
 }

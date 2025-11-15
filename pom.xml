@@ -127,6 +127,11 @@
             <artifactId>poi-ooxml</artifactId>
             <version>5.2.4</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.anastaciocintra</groupId>
+            <artifactId>escpos-coffee</artifactId>
+            <version>4.0.1</version>
+        </dependency>
 
     </dependencies>
 

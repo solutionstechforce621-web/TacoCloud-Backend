@@ -1,6 +1,7 @@
 package com.api.Summit.API.view.dto;
 
 import com.api.Summit.API.model.entities.Negocio;
+import com.api.Summit.API.model.entities.PedidoVenta;
 import lombok.*;
 
 @Getter
@@ -41,6 +42,26 @@ public class NegocioDTO {
                 .codigoPostal(negocioDTO.getCodigoPostal())
                 .correo(negocioDTO.getCorreo())
                 .telefono(negocioDTO.getTelefono())
+                .build();
+    }
+
+    public static PedidoVentaDTO fromEntity(PedidoVenta pedido) {
+        return PedidoVentaDTO.builder()
+                .id(pedido.getId())
+                .tipoPedido(pedido.getTipoPedido())
+                .estado(pedido.getEstado())
+                .total(pedido.getTotal())
+                .observaciones(pedido.getObservaciones())
+                .ticketCocina(pedido.getTicketCocina())
+                .ticketCliente(pedido.getTicketCliente())
+                .negocio(NegocioDTO.fromNegocio(pedido.getNegocio())) // ← AGREGADO
+                .clienteId(pedido.getCliente() != null ? pedido.getCliente().getId() : null)
+                .clienteNombre(pedido.getCliente() != null ? pedido.getCliente().getNombre() : null)
+                .nombreCliente(pedido.getNombreCliente())
+                .detalles(pedido.getDetalles().stream().map(DetallePedidoVentaDTO::fromEntity).toList())
+                .pago(pedido.getPago() != null ? PagoDTO.fromEntity(pedido.getPago()) : null)
+                .createdAt(pedido.getCreatedAt())
+                .updatedAt(pedido.getUpdatedAt())
                 .build();
     }
 }
